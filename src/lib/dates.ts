@@ -38,6 +38,11 @@ export function monthMatrix(year: number, month: number): (string | null)[][] {
   return rows
 }
 
+export function shiftDate(dateKey: string, delta: number): string {
+  const [y, m, d] = dateKey.split('-').map(Number)
+  return todayKey(new Date(y, m - 1, d + delta))
+}
+
 export function shiftMonth(year: number, month: number, delta: number) {
   const d = new Date(year, month + delta, 1)
   return { year: d.getFullYear(), month: d.getMonth() }

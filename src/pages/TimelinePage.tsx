@@ -5,6 +5,7 @@ import { ObjectUrl } from '../components/ObjectUrl'
 import { db } from '../db'
 import type { Attachment, DayRecord } from '../db/types'
 import { MOODS } from '../lib/constants'
+import type { Mood } from '../db/types'
 import { formatDisplayDate } from '../lib/dates'
 
 interface TimelineItem {
@@ -17,6 +18,7 @@ interface TimelineItem {
 export function TimelinePage() {
   const navigate = useNavigate()
   const [query, setQuery] = useState('')
+  const [filter, setFilter] = useState<'all' | 'favorite' | Mood>('all')
   const days = useLiveQuery(() => db.days.toArray(), [])
   const activities = useLiveQuery(() => db.activities.toArray(), [])
   const attachments = useLiveQuery(() => db.attachments.toArray(), [])
@@ -55,14 +57,24 @@ export function TimelinePage() {
 
   const items = useMemo(() => {
     const q = query.trim().toLowerCase()
-    if (!q) return allItems
     return allItems.filter((item) => {
-      const hay = [item.day?.title ?? '', item.day?.body ?? '', ...item.activities]
+      if (filter === 'favorite' && !item.day?.favorite) return false
+      if (filter !== 'all' && filter !== 'favorite' && item.day?.mood !== filter) return false
+      if (!q) return true
+      const hay = [
+        item.day?.title ?? '',
+        item.day?.body ?? '',
+        item.day?.highlight ?? '',
+        item.day?.place ?? '',
+        item.day?.people ?? '',
+        ...(item.day?.tags ?? []),
+        ...item.activities,
+      ]
         .join(' ')
         .toLowerCase()
       return hay.includes(q)
     })
-  }, [allItems, query])
+  }, [allItems, query, filter])
 
   const randomRecall = () => {
     if (!allItems.length) return
@@ -82,12 +94,39 @@ export function TimelinePage() {
         </button>
       </header>
 
+      <div className="filter-row">
+        <button
+          type="button"
+          className={filter === 'all' ? 'chip active' : 'chip'}
+          onClick={() => setFilter('all')}
+        >
+          全部
+        </button>
+        <button
+          type="button"
+          className={filter === 'favorite' ? 'chip active' : 'chip'}
+          onClick={() => setFilter('favorite')}
+        >
+          收藏
+        </button>
+        {MOODS.map((mood) => (
+          <button
+            key={mood.value}
+            type="button"
+            className={filter === mood.value ? 'chip active' : 'chip'}
+            onClick={() => setFilter(mood.value)}
+          >
+            {mood.label}
+          </button>
+        ))}
+      </div>
+
       <label className="field">
         搜索
         <input
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="搜索正文或活动…"
+          placeholder="搜正文、一句、地点、标签或活动…"
         />
       </label>
 
@@ -111,17 +150,18 @@ export function TimelinePage() {
                 <div>
                   <strong>{formatDisplayDate(item.date)}</strong>
                   <p>
-                    {item.day?.title ||
+                    {item.day?.highlight ||
+                      item.day?.title ||
                       item.day?.body.slice(0, 80) ||
                       item.activities[0] ||
                       '这一天有记录'}
                   </p>
                   <div className="meta-row">
+                    {item.day?.favorite ? <span>收藏</span> : null}
                     {moodLabel ? <span>{moodLabel}</span> : null}
                     {item.day?.weather ? <span>{item.day.weather.summary}</span> : null}
-                    {item.activities.length ? (
-                      <span>{item.activities.length} 条活动</span>
-                    ) : null}
+                    {item.day?.place ? <span>{item.day.place}</span> : null}
+                    {item.activities.length ? <span>{item.activities.length} 条活动</span> : null}
                   </div>
                 </div>
               </Link>

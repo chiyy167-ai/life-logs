@@ -1,9 +1,11 @@
 import { useState, type FormEvent } from 'react'
+import { GateShell } from '../components/GateShell'
 import { useAuth } from '../context/AuthContext'
 
 export function UnlockPage() {
   const { unlock, meta } = useAuth()
   const [password, setPassword] = useState('')
+  const [show, setShow] = useState(false)
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(false)
 
@@ -17,32 +19,32 @@ export function UnlockPage() {
   }
 
   return (
-    <div className="gate-page">
-      <div className="gate-card">
-        <p className="brand">Life Logs</p>
-        <h1>欢迎回来{meta?.displayName ? `，${meta.displayName}` : ''}</h1>
-        <p className="lede">输入访问密码继续。本标签页内解锁一次即可。</p>
-        <form onSubmit={onSubmit} className="stack-form">
-          <label>
-            访问密码
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              autoComplete="current-password"
-              autoFocus
-              required
-            />
-          </label>
-          {error ? <p className="error-text">{error}</p> : null}
-          <button type="submit" className="primary-btn wide" disabled={busy}>
-            {busy ? '验证中…' : '解锁'}
-          </button>
-        </form>
-        <p className="hint">
-          忘记密码？只能在浏览器中清除本站数据后重新设置。建议定期在设置页导出备份。
-        </p>
-      </div>
-    </div>
+    <GateShell
+      kicker="已上锁"
+      title={meta?.displayName ? `${meta.displayName}，欢迎回来` : '欢迎回来'}
+      lede="本标签页解锁一次即可。关掉页面后需要再输入密码。"
+    >
+      <form onSubmit={onSubmit} className="stack-form">
+        <label>
+          访问密码
+          <input
+            type={show ? 'text' : 'password'}
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            autoComplete="current-password"
+            autoFocus
+            required
+          />
+        </label>
+        <button type="button" className="text-btn" onClick={() => setShow((v) => !v)}>
+          {show ? '隐藏密码' : '显示密码'}
+        </button>
+        {error ? <p className="error-text">{error}</p> : null}
+        <button type="submit" className="primary-btn wide" disabled={busy}>
+          {busy ? '验证中…' : '进入日记'}
+        </button>
+      </form>
+      <p className="hint">忘记密码只能清除本站数据后重设。换机前请先在设置里导出备份。</p>
+    </GateShell>
   )
 }

@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from 'react'
+import { GateShell } from '../components/GateShell'
 import { useAuth } from '../context/AuthContext'
 
 export function SetupPage() {
@@ -6,6 +7,7 @@ export function SetupPage() {
   const [displayName, setDisplayName] = useState('')
   const [password, setPassword] = useState('')
   const [confirm, setConfirm] = useState('')
+  const [show, setShow] = useState(false)
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(false)
 
@@ -31,47 +33,49 @@ export function SetupPage() {
   }
 
   return (
-    <div className="gate-page">
-      <div className="gate-card">
-        <p className="brand">Life Logs</p>
-        <h1>创建你的私密日记</h1>
-        <p className="lede">数据只存在本机浏览器。请记住密码——无法找回，只能清空后重设。</p>
-        <form onSubmit={onSubmit} className="stack-form">
-          <label>
-            显示名（可选）
-            <input
-              value={displayName}
-              onChange={(e) => setDisplayName(e.target.value)}
-              placeholder="怎么称呼你"
-              autoComplete="nickname"
-            />
-          </label>
-          <label>
-            访问密码
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              autoComplete="new-password"
-              required
-            />
-          </label>
-          <label>
-            确认密码
-            <input
-              type="password"
-              value={confirm}
-              onChange={(e) => setConfirm(e.target.value)}
-              autoComplete="new-password"
-              required
-            />
-          </label>
-          {error ? <p className="error-text">{error}</p> : null}
-          <button type="submit" className="primary-btn wide" disabled={busy}>
-            {busy ? '创建中…' : '开始使用'}
-          </button>
-        </form>
-      </div>
-    </div>
+    <GateShell
+      kicker="第一次打开"
+      title="给这本日记上锁"
+      lede="设一个只有你知道的密码。忘了只能清空本机数据，所以请先记住它。"
+    >
+      <form onSubmit={onSubmit} className="stack-form">
+        <label>
+          怎么称呼你
+          <input
+            value={displayName}
+            onChange={(e) => setDisplayName(e.target.value)}
+            placeholder="可选"
+            autoComplete="nickname"
+          />
+        </label>
+        <label>
+          访问密码
+          <input
+            type={show ? 'text' : 'password'}
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            autoComplete="new-password"
+            required
+          />
+        </label>
+        <label>
+          再输入一次
+          <input
+            type={show ? 'text' : 'password'}
+            value={confirm}
+            onChange={(e) => setConfirm(e.target.value)}
+            autoComplete="new-password"
+            required
+          />
+        </label>
+        <button type="button" className="text-btn" onClick={() => setShow((v) => !v)}>
+          {show ? '隐藏密码' : '显示密码'}
+        </button>
+        {error ? <p className="error-text">{error}</p> : null}
+        <button type="submit" className="primary-btn wide" disabled={busy}>
+          {busy ? '创建中…' : '打开日记'}
+        </button>
+      </form>
+    </GateShell>
   )
 }

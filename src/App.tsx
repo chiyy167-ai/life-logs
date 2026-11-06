@@ -13,9 +13,9 @@ function Gate({ children }: { children: ReactNode }) {
   const { ready, configured, unlocked } = useAuth()
   if (!ready) {
     return (
-      <div className="gate-page">
-        <p className="brand">Life Logs</p>
-        <p className="muted">加载中…</p>
+      <div className="gate-page loading-gate">
+        <p className="gate-mark">Life Logs</p>
+        <p className="muted">正在打开日记…</p>
       </div>
     )
   }

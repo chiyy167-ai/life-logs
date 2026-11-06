@@ -17,7 +17,7 @@ export function MoodPicker({
           className={value === m.value ? 'chip active' : 'chip'}
           onClick={() => onChange(value === m.value ? '' : m.value)}
         >
-          {m.label}
+          {m.mark} {m.label}
         </button>
       ))}
     </div>

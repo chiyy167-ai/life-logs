@@ -6,7 +6,7 @@ export interface WeatherInfo {
   weatherCode: number
   summary: string
   fetchedAt: string
-  source: 'geo' | 'manual'
+  source: 'geo' | 'manual' | 'picked'
   lat?: number
   lon?: number
   placeLabel?: string
@@ -18,14 +18,22 @@ export interface DayRecord {
   body: string
   mood: Mood | ''
   weather: WeatherInfo | null
+  highlight: string
+  place: string
+  people: string
+  tags: string[]
+  favorite: boolean
   updatedAt: string
 }
+
+export type ActivityKind = 'life' | 'work' | 'health' | 'social' | 'rest'
 
 export interface Activity {
   id: string
   date: string
   time: string
   text: string
+  kind: ActivityKind
 }
 
 export interface AttachmentMeta {
